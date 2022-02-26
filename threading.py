@@ -1,40 +1,42 @@
 from concurrent.futures import thread
+from email.mime import base
 import time
 import threading
+import base64
+from random import randint
 import sys
-import os
-
-sys.stderr.write("spam\n")
-
-def getInput():
-    global rand_num
-    user_input = input('Enter Your Characters')
-    print(rand_num)
+import numpy
 
 def count():
     global rand_num
     while True:
         rand_num += time.time_ns()
-        time.sleep(1)
+        time.sleep(0.5)
+
+def randomParts(rand_num, numberOfParts, part_list):
+    if numberOfParts < 2:
+        print("Please select 2 or more parts to divide")
+        sys.exit()
+
+    part_list.append(randint(0, rand_num))
+    part_list.append(rand_num-part_list[0])
+
 
 rand_num = 0
-thread1 = threading.Thread(target=getInput)
-thread2 = threading.Thread(target=count)
+numberOfParts = 2
+parts_list = []
 
+thread1 = threading.Thread(target=count)
 thread1.start()
-thread2.start()
 
-thread1.join()
-thread2.join()
+try:
+    usr_input = input("Enter Random Characters: ")
+
+except KeyboardInterrupt:
+    thread1.join()
 print(rand_num)
 
-'''
-def a():
-    print("Function a is running at time: " + str(int(time.time())) + " seconds.")
+randomParts(100, 3, parts_list)
+print(parts_list)
 
-def b():
-    print("Function b is running at time: " + str(int(time.time())) + " seconds.")
-
-threading.Thread(target=a).start()
-threading.Thread(target=b).start()
-'''
+print(parts_list[0].to_bytes(10, 'big'))
