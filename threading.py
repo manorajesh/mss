@@ -3,40 +3,36 @@ from email.mime import base
 import time
 import threading
 import base64
-from random import randint
-import sys
-import numpy
+import numpy as np, numpy.random
 
 def count():
     global rand_num
     while True:
         rand_num += time.time_ns()
+        if stop_thread:
+            break
         time.sleep(0.5)
 
-def randomParts(rand_num, numberOfParts, part_list):
-    if numberOfParts < 2:
-        print("Please select 2 or more parts to divide")
-        sys.exit()
-
-    part_list.append(randint(0, rand_num))
-    part_list.append(rand_num-part_list[0])
-
-
 rand_num = 0
-numberOfParts = 2
-parts_list = []
+numberOfParts = 6
+part_list = []
+rand_part_list = []
+stop_thread = False
 
 thread1 = threading.Thread(target=count)
 thread1.start()
 
-try:
-    usr_input = input("Enter Random Characters: ")
-
-except KeyboardInterrupt:
-    thread1.join()
+usr_input = input("Enter Random Characters: ")
+stop_thread = True
 print(rand_num)
 
-randomParts(100, 3, parts_list)
-print(parts_list)
+for i in range(numberOfParts):
+    rand_part_list.append(np.random.random())
 
-print(parts_list[0].to_bytes(10, 'big'))
+for c in range(numberOfParts):
+    part_list.append(rand_part_list[c] / numpy.sum(rand_part_list) * rand_num)
+
+print(part_list)
+print(f"{numpy.sum(part_list):1f}")
+
+print(part_list[0].to_bytes(10, 'big'))
