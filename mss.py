@@ -1,8 +1,8 @@
-from concurrent.futures import thread
 import time
 import threading
 import random
 import sys
+import base64
 
 ################################################# Initialization #######################################################
 
@@ -21,7 +21,7 @@ def init():
 def count():
     global rand_num
     while True:
-        rand_num += int(time.time()) # Source of entropy for random number (Possibly can be recreated; however, requires lots of knowledge)
+        rand_num += int(time.time_ns()) # Source of entropy for random number (Possibly can be recreated; however, requires lots of knowledge about system)
         if stop_thread:
             break
         time.sleep(0.0001)
@@ -31,6 +31,15 @@ def sum(num_list):
     for i in range(len(num_list)):
         sum += num_list[i]
     return sum
+
+def randomParts(random_num, num_parts):
+    og_rand = random_num
+    while num_parts>1:
+        x = random.randint(0, random_num) if random_num != 1 else 1
+        yield x
+        random_num -= x
+        num_parts -= 1
+    yield og_rand-x
 
 rand_num = 0
 numberOfParts = 0
@@ -46,8 +55,12 @@ try:
     while True:
         usr_input = input("How many parts should the password be in?\n> ")
         if usr_input.isdigit():
-            numberOfParts = int(usr_input)
-            break
+            if int(usr_input) < 10000000000000000:
+                numberOfParts = int(usr_input)
+                break
+            else:
+                print("\nThat's a lot of friends; more than the population of the Earth")
+                print("Pick the important ones\n")
         else:
             print("\nPlease enter a number!")
 
@@ -64,11 +77,26 @@ except KeyboardInterrupt:
 
 rand_num = random.randint(random.randint(0, rand_num), rand_num) # Stops the password from being brute forced if somebody knew the time when the password was generated
 
-for i in range(numberOfParts):
-    rand_part_list.append(random.random())
+while True:
+    try:
+        usr_input = input("\nWhat data type for password?\ninteger (i)\nfloat (f)\n")
+    except KeyboardInterrupt:
+        print("\n\nGracefully exit...\n")
+        sys.exit()
 
-for c in range(numberOfParts):
-    part_list.append(rand_part_list[c] / sum(rand_part_list) * rand_num)
+    if usr_input == 'f':
+        for i in range(numberOfParts):
+            rand_part_list.append(random.random())
+        for c in range(numberOfParts):
+            part_list.append(rand_part_list[c] / sum(rand_part_list) * rand_num)
+        break
+
+    elif usr_input == 'i':
+        part_list = list(randomParts(rand_num, numberOfParts))
+        break
+
+    else:
+        print("\nPlease enter a valid option!\n")
 
 ################################################# Output ###############################################################
 
@@ -97,3 +125,10 @@ if usr_input == "n":
 
 print("\nParts: " + str(part_list))
 print("Password: " + str(sum(part_list)))
+
+### Base64 Encoding ###
+print("\n---")
+print("Parts in B64:")
+for i in range(len(part_list)):
+    print((base64.b64encode(bytes(str(part_list[i]), 'ascii'))).decode('ascii'))
+print("\nPassword in B64: %s" % (base64.b64encode(bytes(str(rand_num), 'ascii'))).decode('ascii'))
