@@ -132,3 +132,4 @@ print("Parts in B64:")
 for i in range(len(part_list)):
     print((base64.b64encode(bytes(str(part_list[i]), 'ascii'))).decode('ascii'))
 print("\nPassword in B64: %s" % (base64.b64encode(bytes(str(rand_num), 'ascii'))).decode('ascii'))
+print("Note: the B64 output is formatted in ASCII")
